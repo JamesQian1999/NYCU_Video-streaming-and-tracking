@@ -3,14 +3,15 @@ import glob, os
 def evalformat():
     training_dataset = glob.glob('../gta/test_labels/*.txt')
 
+    os.makedirs('../gta/SE', exist_ok = True)
+    os.makedirs('../gta/SE/groundtruths', exist_ok = True)
+    os.makedirs('../gta/SE/detections', exist_ok = True)
+
     for file in training_dataset:
         label = open(file, 'r')
         train = label.readlines()
 
-        os.makedirs('../gta/Original', exist_ok = True)
-        os.makedirs('../gta/Original/groundtruths', exist_ok = True)
-
-        gt = open('../gta/Original/groundtruths/'+file.split('/')[-1], 'w')
+        gt = open('../gta/SE/groundtruths/'+file.split('/')[-1], 'w')
         for i in range(len(train)):
 
             train[i] = train[i].strip()
@@ -24,7 +25,7 @@ def evalformat():
             gt.write(f'0 {x_min} {y_min} {x_min+width} {y_min+height}\n')
 
 def inference():
-    os.system("python YOLOX/tools/demo.py image -f YOLOX/exps/example/custom/yolox_s.py -c best_ckpt_original_e600.pth --path ../gta/test --conf 0.35 --nms 0.5 --tsize 640 --log_path '../gta/Original/'")
+    os.system("python YOLOX/tools/demo.py image -f YOLOX/exps/example/custom/yolox_s.py -c best_ckpt_SE_e600.pth --path ../gta/test --conf 0.35 --nms 0.5 --tsize 640 --log_path '../gta/SE/'")
 
 if __name__ == "__main__":
 

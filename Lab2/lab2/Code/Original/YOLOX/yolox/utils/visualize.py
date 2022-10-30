@@ -16,7 +16,7 @@ def vis(img, boxes, scores, cls_ids, conf=0.5, class_names=None, log_path = '', 
         score = scores[i]
 
         # print(f'0 {score} {box[0]} {box[1]} {box[2]} {box[3]}\n')
-        f = open(log_path+'/detections/' + img_info['file_name'][:-3] + 'txt','a')
+        f = open(log_path+'detections/' + img_info['file_name'][:-3] + 'txt','a')
         f.write(f'0 {score} {box[0]} {box[1]} {box[2]} {box[3]}\n')
 
         if score < conf:
