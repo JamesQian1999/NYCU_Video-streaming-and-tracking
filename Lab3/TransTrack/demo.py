@@ -210,11 +210,11 @@ def main(args):
     # cv2.imshow('test', img/255.)
     # cv2.waitKey()
     # exit()
-    debug = True
+    debug = False
     run_all_frame = True
     start_frame = 0
     frame_num   = 100
-    frameTime  = 2
+    frameTime  = 1
 
     while res:
         count += 1
