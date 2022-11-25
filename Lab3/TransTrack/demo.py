@@ -245,8 +245,10 @@ def main(args):
             if old_pos != pos:
                 if (bbox[0] < pos[0] < bbox[2]) and (bbox[1] < pos[1] < bbox[3]):
                     if tracking_id in track_list:
+                        print(f'Remove ID {tracking_id}, position: {pos}')
                         track_list.remove(tracking_id)
                     else:
+                        print(f'Add ID {tracking_id}, position: {pos}')
                         track_list.append(tracking_id)
 
             if debug or tracking_id in track_list:
