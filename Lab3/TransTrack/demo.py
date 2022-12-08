@@ -22,7 +22,7 @@ from util.misc import nested_tensor_from_tensor_list
 from track_tools.colormap import colormap
 
 pos = (0,0)
-old_pos = (0,0)
+click = False
 track_list = []
 
 def get_args_parser():
@@ -162,13 +162,13 @@ def resize(image, size=800, max_size=1333):
 
 
 def mousePosition(event,x,y,flags,param):
-    global pos, old_pos
+    global pos, click
     if event == cv2.EVENT_LBUTTONDOWN:
-        old_pos = pos
         pos = (x,y)
+        click = True
 
 def main(args):
-    global pos, old_pos, track_list
+    global pos, click, track_list
     if args.streaming:
         cap = cv2.VideoCapture(0)
     else:
@@ -176,7 +176,7 @@ def main(args):
     frame_rate = int(round(cap.get(cv2.CAP_PROP_FPS)))
     video_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     video_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        
+         
         
     demo_images_path = os.path.join(args.demo_output, 'demo_images')
     if not os.path.exists(demo_images_path):
@@ -186,7 +186,7 @@ def main(args):
     model, _, postprocessors = build_tracktest_model(args)    
     model.to(device)
     model.eval()
-    tracker = Tracker(score_thresh=args.track_thresh)
+    tracker = Tracker(score_thresh=args.track_thresh, max_age=70)
 
     checkpoint = torch.load(args.resume, map_location='cpu')
     _, _ = model.load_state_dict(checkpoint['model'], strict=False)
@@ -229,20 +229,20 @@ def main(args):
 
         orig_sizes = torch.stack([torch.as_tensor([video_height, video_width])], dim=0).to(device)
         results = postprocessors['bbox'](outputs, orig_sizes)
-        # print(results[0].keys())
         
         if count == 1:
             res_track = tracker.init_track(results[0])
         else:
             res_track = tracker.step(results[0])
-                
+
         for ret in res_track:
             if ret['active'] == 0:
                 continue
             bbox = ret['bbox']
             tracking_id = ret['tracking_id']
 
-            if old_pos != pos:
+            if click:
+                click = False
                 if (bbox[0] < pos[0] < bbox[2]) and (bbox[1] < pos[1] < bbox[3]):
                     if tracking_id in track_list:
                         print(f'Remove ID {tracking_id}, position: {pos}')
@@ -253,42 +253,23 @@ def main(args):
 
             if debug or tracking_id in track_list:
                 cv2.rectangle(img, (int(bbox[0]), int(bbox[1])), (int(bbox[2]), int(bbox[3])), color_list[tracking_id%79].tolist(), thickness=2)
-                cv2.putText(img, "{}".format(tracking_id), (int(bbox[0]), int(bbox[1])), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color_list[tracking_id%79].tolist(), 2)
-        
-        # cv2.imwrite(os.path.join(demo_images_path, "demo{:0>6d}.png".format(count)), img)
+
         cv2.imshow('Track', img/255.)
         if cv2.waitKey(frameTime) & 0xFF == ord('q'):
             break
-
-        cv2.setMouseCallback('Track', mousePosition)
         
-        # print('Frame{:d} of the video is done'.format(count))
-
         res, img = cap.read()
+        cv2.setMouseCallback('Track', mousePosition)
 
 
         if (not run_all_frame) and (count == start_frame + frame_num):
             break
     
     print('Lenth of the video: {:d} frames'.format(count if run_all_frame else frame_num))
-
     
-    # print("Starting img2video")
-    # img_paths = gb.glob(os.path.join(demo_images_path, "*.png"))
-    # size = (video_width, video_height) 
-    # videowriter = cv2.VideoWriter(os.path.join(args.demo_output, "demo_video.avi"), cv2.VideoWriter_fourcc('M','J','P','G'), frame_rate, size)
-
-    # for img_path in sorted(img_paths):
-    #     img = cv2.imread(img_path)
-    #     img = cv2.resize(img, size)
-    #     videowriter.write(img)
-
-    # videowriter.release()
-    # print("img2video is done")            
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('Demo for TransTrack', parents=[get_args_parser()])
     args = parser.parse_args()
     main(args)
-    # --with_box_refine
+    # python demo.py --with_box_refine --streaming

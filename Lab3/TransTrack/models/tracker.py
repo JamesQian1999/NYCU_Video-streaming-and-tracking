@@ -9,7 +9,7 @@ from util import box_ops
 import copy
 
 class Tracker(object):
-    def __init__(self, score_thresh, max_age=75):        
+    def __init__(self, score_thresh, max_age=55):        
         self.score_thresh = score_thresh
         self.max_age = max_age        
         self.id_count = 0
