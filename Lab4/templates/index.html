@@ -1,0 +1,40 @@
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8  offset-lg-2">
+                <h3 class="mt-5">Live Streaming</h3>
+
+                <form method="POST" action="/start">
+                    <input type="submit" value="Start" name="submit_button" />
+                    <input type="submit" value="Pause" name="submit_button" />
+                </form>
+
+                <form method="POST" action="/resolution">
+                    <select id="operator" name="operator">
+                        <option value="1080p" {% if previous_data["selected_item"] == "1080p"%} selected {% endif %}>1080p</option>
+                        <option value="720p"  {% if previous_data["selected_item"] ==  "720p"%} selected {% endif %}>720p</option>
+                        <option value="480p"  {% if previous_data["selected_item"] ==  "480p"%} selected {% endif %}>480p</option>
+                        <option value="360p"  {% if previous_data["selected_item"] ==  "360p"%} selected {% endif %}>360p</option>
+                        <option value="240p"  {% if previous_data["selected_item"] ==  "240p"%} selected {% endif %} >240p</option>
+                    </select>
+                    <input type="submit" value="Submit">
+                </form> 
+
+                <form method="POST" action="/detect">
+                    <p>Add or remove a class to detect:</p>
+                    <input name="text">
+                    <input type="submit" value="Add" name="submit_button" />
+                    <input type="submit" value="Remove" name="submit_button" />
+                </form>
+                <form method="POST" action="/detect">
+                    <p>Set confident(0-1):</p>
+                    <input name="text">
+                    <input type="submit" value="submit" name="submit_button" />
+                </form>
+
+                <img src="{{ '/video_feed' }}" width="70%">
+            </div>
+        </div>
+    </div>
+</body>
+    
